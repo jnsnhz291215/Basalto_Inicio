@@ -1,6 +1,20 @@
+<<<<<<< HEAD
 node_modules
 dist
 .DS_Store
 *.local
 .env
 .env.*.local
+=======
+node_modules/
+.env
+.DS_Store
+.package.json
+.package-lock.json
+.code-workspace
+.pdf
+uploads/temp
+uploads/inventario-peticiones/
+docs/*-logs.txt
+docs/basalto-logs.txt
+>>>>>>> 4f1cc744fed5742c311dcaa847498c695c61d86f
