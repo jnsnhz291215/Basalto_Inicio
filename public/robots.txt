@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /
+
+Disallow: /login
+Disallow: /dashboard
+Disallow: /sin-permiso
+
+Sitemap: https://inicio.basalto.app/sitemap.xml

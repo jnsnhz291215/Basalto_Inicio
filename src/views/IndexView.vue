@@ -1,12 +1,8 @@
 <template>
   <div class="landing-page">
     <header class="corporate-header">
-      <RouterLink class="brand-lockup" to="/" aria-label="Ir a Basalto Inicio">
-        <span class="brand-mark">B</span>
-        <span>
-          <strong>Basalto</strong>
-          <small>Inicio</small>
-        </span>
+      <RouterLink class="brand-lockup" to="/" aria-label="Ir a Basaltodrilling">
+        <img class="brand-logo" src="/logoBASALTO.png" alt="Basaltodrilling" />
       </RouterLink>
 
       <button
