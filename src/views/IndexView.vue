@@ -102,8 +102,7 @@ function getSafeReturnTo() {
 
   try {
     const url = new URL(value, window.location.origin)
-    const allowedHost = url.hostname === 'localhost' || url.hostname.endsWith('.basalto.app')
-    const allowedOrigin = url.origin === window.location.origin || allowedHost
+    const allowedOrigin = url.origin === window.location.origin
     return allowedOrigin && url.href !== window.location.href ? url.toString() : ''
   } catch {
     return ''
@@ -113,5 +112,6 @@ function getSafeReturnTo() {
 function redirectToReturnTo() {
   const returnTo = getSafeReturnTo()
   if (returnTo) window.location.href = returnTo
+  else if (window.location.pathname === '/login') window.location.href = '/'
 }
 </script>
