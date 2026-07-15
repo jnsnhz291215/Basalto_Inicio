@@ -6,7 +6,7 @@ import SinPermisoView from '../views/SinPermisoView.vue'
 const router = createRouter({
   history: createWebHistory(),
   routes: [
-    { path: '/', name: 'index', component: IndexView, meta: { requiresAuth: true } },
+    { path: '/', name: 'index', component: IndexView },
     { path: '/login', name: 'login', component: IndexView },
     { path: '/sin-permiso', name: 'sin-permiso', component: SinPermisoView }
   ]
