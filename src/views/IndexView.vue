@@ -4,7 +4,7 @@
     <h1>{{ appName }}</h1>
     <p class="lead">
       Inicia sesión con la misma API de proyecto_basalto. La cookie httpOnly se
-      comparte en localhost entre las tres apps.
+      comparte entre los subdominios de Basalto.
     </p>
 
     <template v-if="!bootstrapped || loading && !user">
@@ -30,8 +30,8 @@
         Cerrar sesión
       </button>
       <p class="hint">
-        Abre la otra app Vue o proyecto_basalto (:3000): la sesión debería seguir activa
-        (mismo host <code>localhost</code>).
+        Abre la otra app Vue: la sesión debería seguir activa usando la misma cookie
+        del backend centralizado.
       </p>
     </template>
 
@@ -55,8 +55,8 @@
         {{ loading ? 'Entrando…' : 'Iniciar sesión' }}
       </button>
       <p class="hint">
-        Backend: <code>{{ apiHint }}</code>. En proyecto_basalto configura
-        <code>CORS_ALLOWED_ORIGINS</code> con este origen.
+        Backend: <code>{{ apiHint }}</code>. El backend debe permitir este origen
+        con CORS y credenciales.
       </p>
     </form>
   </section>
@@ -65,9 +65,10 @@
 <script setup>
 import { onMounted, ref } from 'vue'
 import { useAuth } from '../composables/useAuth'
+import { API_BASE_URL } from '../api/auth'
 
 const appName = import.meta.env.VITE_APP_NAME || 'Basalto Inicio'
-const apiHint = import.meta.env.VITE_API_BASE_URL || '/api → localhost:3000 (proxy)'
+const apiHint = API_BASE_URL
 
 const { user, loading, error, bootstrapped, bootstrap, login, logout } = useAuth()
 
@@ -75,8 +76,9 @@ const rut = ref('')
 const password = ref('')
 const formError = ref('')
 
-onMounted(() => {
-  bootstrap()
+onMounted(async () => {
+  await bootstrap()
+  if (user.value) redirectToReturnTo()
 })
 
 async function onLogin() {
@@ -84,6 +86,7 @@ async function onLogin() {
   try {
     await login(rut.value, password.value)
     password.value = ''
+    redirectToReturnTo()
   } catch (e) {
     formError.value = e.message || 'No se pudo iniciar sesión'
   }
@@ -91,5 +94,24 @@ async function onLogin() {
 
 async function onLogout() {
   await logout()
+}
+
+function getSafeReturnTo() {
+  const value = new URLSearchParams(window.location.search).get('returnTo')
+  if (!value) return ''
+
+  try {
+    const url = new URL(value, window.location.origin)
+    const allowedHost = url.hostname === 'localhost' || url.hostname.endsWith('.basalto.app')
+    const allowedOrigin = url.origin === window.location.origin || allowedHost
+    return allowedOrigin && url.href !== window.location.href ? url.toString() : ''
+  } catch {
+    return ''
+  }
+}
+
+function redirectToReturnTo() {
+  const returnTo = getSafeReturnTo()
+  if (returnTo) window.location.href = returnTo
 }
 </script>
