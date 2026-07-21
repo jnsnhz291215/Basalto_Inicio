@@ -38,10 +38,6 @@ const robots = allowIndexing
   ? `User-agent: *
 Allow: /
 
-Disallow: /login
-Disallow: /dashboard
-Disallow: /sin-permiso
-
 Sitemap: https://inicio.basalto.app/sitemap.xml
 `
   : `User-agent: *
@@ -53,11 +49,12 @@ writeFileSync(
   resolve(publicDir, 'sitemap.xml'),
   `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url>
-    <loc>https://inicio.basalto.app/</loc>
-    <changefreq>weekly</changefreq>
-    <priority>1.0</priority>
-  </url>
+  <url><loc>https://inicio.basalto.app/</loc><changefreq>weekly</changefreq><priority>1.0</priority></url>
+  <url><loc>https://inicio.basalto.app/servicios</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://inicio.basalto.app/nosotros</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://inicio.basalto.app/proyectos</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://inicio.basalto.app/trabaja-con-nosotros</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://inicio.basalto.app/contacto</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
 </urlset>
 `
 )

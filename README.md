@@ -1,19 +1,10 @@
 # Basalto Inicio (Vue 3 + Vite)
 
-App hermana de **proyecto_basalto**. Comparte la sesión JWT (cookie httpOnly `token`).
+Sitio corporativo público de Basalto Drilling. Sin autenticación ni llamadas a backend.
 
 ## Requisitos
 
-1. Backend centralizado disponible en `https://turnos.basalto.app` con:
-
-```env
-CORS_ALLOWED_ORIGINS=https://inicio.basalto.app,https://rendiciones.basalto.app
-COOKIE_DOMAIN=.basalto.app
-COOKIE_SAMESITE=none
-COOKIE_SECURE=true
-```
-
-2. Node 18+.
+Node 18+.
 
 ## Arranque
 
@@ -22,28 +13,26 @@ npm install
 npm run dev
 ```
 
-Abre la app — el index permite login y muestra el usuario de `/api/auth/me`.
+Abre `http://localhost:5173`.
 
-## SSO
+## Rutas
 
-- Las llamadas van a `https://turnos.basalto.app`.
-- La cookie httpOnly queda disponible para los subdominios de `basalto.app`.
-- Perfil de UI en `localStorage` (como en proyecto_basalto); la fuente de verdad es la cookie.
+- `/` — Inicio
+- `/servicios` — Servicios
+- `/nosotros` — Nosotros
+- `/proyectos` — Proyectos
+- `/trabaja-con-nosotros` — Trabaja con nosotros
+- `/contacto` — Contacto
 
-## Producción (subdominios)
-
-En el API:
+## Variables de entorno
 
 ```env
-COOKIE_DOMAIN=.basalto.app
-COOKIE_SAMESITE=none
-COOKIE_SECURE=true
-CORS_ALLOWED_ORIGINS=https://inicio.basalto.app,https://rendiciones.basalto.app
+VITE_APP_NAME=BasaltoDrillingSPA
+VITE_PUBLIC_INDEXING=true
 ```
 
-Y en esta app:
+## Build
 
-```env
-VITE_API_BASE_URL=https://turnos.basalto.app
-VITE_LOGIN_URL=/login
+```bash
+npm run build
 ```

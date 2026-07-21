@@ -6,3 +6,4 @@ dist/
 .env.*.local
 .DS_Store
 .robots.txt
+_auth_removido/

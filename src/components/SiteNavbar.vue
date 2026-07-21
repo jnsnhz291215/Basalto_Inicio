@@ -39,15 +39,6 @@
       </nav>
 
       <div class="header-actions">
-        <button
-          v-if="isAuthenticated"
-          class="auth-link"
-          type="button"
-          :disabled="loading"
-          @click="$emit('logout')"
-        >
-          {{ userName }} · Salir
-        </button>
         <RouterLink class="btn btn-solid" to="/contacto">Solicitar cotización</RouterLink>
       </div>
     </div>
@@ -57,14 +48,6 @@
 <script setup>
 import { ref } from 'vue'
 import { RouterLink } from 'vue-router'
-
-defineProps({
-  isAuthenticated: { type: Boolean, default: false },
-  loading: { type: Boolean, default: false },
-  userName: { type: String, default: '' }
-})
-
-defineEmits(['logout'])
 
 const navOpen = ref(false)
 
