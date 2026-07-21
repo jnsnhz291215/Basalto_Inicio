@@ -5,5 +5,5 @@ dist/
 .env.local
 .env.*.local
 .DS_Store
-.robots.txt
+.Basalto_Inicio/public/robots.txt
 _auth_removido/
