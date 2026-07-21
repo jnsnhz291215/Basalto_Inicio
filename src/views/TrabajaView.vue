@@ -158,6 +158,7 @@ const loading = ref(false)
 const success = ref(false)
 const error = ref('')
 const cvFile = ref(null)
+let closeTimer = null
 
 const form = reactive({
   nombre: '',
@@ -167,7 +168,15 @@ const form = reactive({
   cargo: ''
 })
 
+function clearCloseTimer() {
+  if (closeTimer) {
+    window.clearTimeout(closeTimer)
+    closeTimer = null
+  }
+}
+
 function openModal(role) {
+  clearCloseTimer()
   success.value = false
   error.value = ''
   cvFile.value = null
@@ -181,6 +190,7 @@ function openModal(role) {
 
 function closeModal() {
   if (loading.value) return
+  clearCloseTimer()
   modalOpen.value = false
 }
 
@@ -212,6 +222,7 @@ async function onSubmit() {
   loading.value = true
   success.value = false
   error.value = ''
+  clearCloseTimer()
 
   try {
     const data = new FormData()
@@ -225,9 +236,10 @@ async function onSubmit() {
     await sendPostulacion(data)
     success.value = true
 
-    window.setTimeout(() => {
+    closeTimer = window.setTimeout(() => {
       modalOpen.value = false
-    }, 1800)
+      closeTimer = null
+    }, 15000)
   } catch (e) {
     error.value = e.message || 'No se pudo enviar la postulación.'
   } finally {
