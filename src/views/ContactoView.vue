@@ -56,7 +56,9 @@
             v-model.trim="form.nombre"
             type="text"
             placeholder="Juan Pérez"
+            autocomplete="name"
             required
+            :disabled="loading"
           />
         </div>
 
@@ -67,7 +69,35 @@
             v-model.trim="form.empresa"
             type="text"
             placeholder="Minera Ejemplo S.A."
+            autocomplete="organization"
             required
+            :disabled="loading"
+          />
+        </div>
+
+        <div class="field">
+          <label for="email">Correo electrónico <span>*</span></label>
+          <input
+            id="email"
+            v-model.trim="form.email"
+            type="email"
+            placeholder="juan.perez@empresa.cl"
+            autocomplete="email"
+            required
+            :disabled="loading"
+          />
+        </div>
+
+        <div class="field">
+          <label for="telefono">Teléfono <span>*</span></label>
+          <input
+            id="telefono"
+            v-model.trim="form.telefono"
+            type="tel"
+            placeholder="+56 9 1234 5678"
+            autocomplete="tel"
+            required
+            :disabled="loading"
           />
         </div>
 
@@ -79,12 +109,19 @@
             rows="5"
             placeholder="Cuéntanos sobre tu faena, tipo de sondaje requerido, plazos y volumen estimado."
             required
+            :disabled="loading"
           />
         </div>
 
-        <button class="btn btn-solid full" type="submit">
-          Enviar solicitud
-          <span class="send-icon" aria-hidden="true">
+        <p v-if="success" class="form-alert success" role="status">
+          ¡Solicitud enviada con éxito! Te contactaremos a la brevedad.
+        </p>
+        <p v-if="error" class="form-alert error" role="alert">{{ error }}</p>
+
+        <button class="btn btn-solid full" type="submit" :disabled="loading">
+          <span v-if="loading" class="btn-spinner" aria-hidden="true" />
+          {{ loading ? 'Enviando…' : 'Enviar solicitud' }}
+          <span v-if="!loading" class="send-icon" aria-hidden="true">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <path d="M22 2 11 13" />
               <path d="M22 2 15 22l-4-9-9-4 20-7z" />
@@ -101,19 +138,38 @@
 </template>
 
 <script setup>
-import { reactive } from 'vue'
+import { reactive, ref } from 'vue'
+import { sendContacto } from '../api/publicForms'
 
 const form = reactive({
   nombre: '',
   empresa: '',
+  email: '',
+  telefono: '',
   mensaje: ''
 })
 
-function onSubmit() {
-  const subject = encodeURIComponent(`Cotización — ${form.empresa || 'Proyecto'}`)
-  const body = encodeURIComponent(
-    `Nombre: ${form.nombre}\nEmpresa: ${form.empresa}\n\n${form.mensaje}`
-  )
-  window.location.href = `mailto:info@basaltodrilling.cl?subject=${subject}&body=${body}`
+const loading = ref(false)
+const success = ref(false)
+const error = ref('')
+
+async function onSubmit() {
+  loading.value = true
+  success.value = false
+  error.value = ''
+
+  try {
+    await sendContacto({ ...form })
+    success.value = true
+    form.nombre = ''
+    form.empresa = ''
+    form.email = ''
+    form.telefono = ''
+    form.mensaje = ''
+  } catch (e) {
+    error.value = e.message || 'No se pudo enviar la solicitud.'
+  } finally {
+    loading.value = false
+  }
 }
 </script>
