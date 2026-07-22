@@ -23,11 +23,22 @@
             </span>
           </div>
 
-          <ul>
-            <li v-for="item in grupo.items" :key="item">{{ item }}</li>
+          <ul class="vacancy-list">
+            <li v-for="vacante in grupo.items" :key="vacante.id || vacante.titulo">
+              <div class="vacancy-item">
+                <span class="vacancy-item-title">{{ vacante.titulo }}</span>
+                <button
+                  class="vacancy-info-btn"
+                  type="button"
+                  @click="openDetalle(vacante)"
+                >
+                  Más info
+                </button>
+              </div>
+            </li>
           </ul>
 
-          <button class="btn btn-solid" type="button" @click="openModal(grupo)">
+          <button class="btn btn-solid" type="button" @click="openPostula(grupo.items[0])">
             Postular
             <span aria-hidden="true">→</span>
           </button>
@@ -40,14 +51,68 @@
       </p>
     </div>
 
+    <!-- Modal detalle vacante -->
     <div
-      v-if="modalOpen"
+      v-if="detalleOpen"
       class="modal-backdrop"
       role="presentation"
-      @click.self="closeModal"
+      @click.self="closeDetalle"
+    >
+      <div
+        class="vacante-detalle-modal"
+        role="dialog"
+        aria-modal="true"
+        :aria-labelledby="detalleTitleId"
+      >
+        <button class="modal-close" type="button" aria-label="Cerrar" @click="closeDetalle">
+          ✕
+        </button>
+
+        <div class="vacante-detalle-header">
+          <h2 :id="detalleTitleId">{{ detalle?.titulo }}</h2>
+          <span class="vacante-categoria-badge">{{ detalle?.categoria }}</span>
+        </div>
+
+        <p
+          v-if="detalle?.mostrar_cantidad && detalle?.cantidad_vacantes > 0"
+          class="vacante-cantidad-badge"
+        >
+          {{ detalle.cantidad_vacantes }}
+          {{ detalle.cantidad_vacantes === 1 ? 'vacante disponible' : 'vacantes disponibles' }}
+        </p>
+
+        <div class="vacante-detalle-body">
+          <p
+            v-for="(parrafo, index) in detalleParrafos"
+            :key="index"
+            class="vacante-parrafo"
+          >
+            {{ parrafo }}
+          </p>
+          <p v-if="!detalleParrafos.length" class="vacante-parrafo muted">
+            Sin descripción publicada para este cargo.
+          </p>
+        </div>
+
+        <div class="vacante-detalle-actions">
+          <button class="btn btn-outline" type="button" @click="closeDetalle">Cerrar</button>
+          <button class="btn btn-solid" type="button" @click="postularDesdeDetalle">
+            Postular a esta vacante
+            <span aria-hidden="true">→</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal formulario postulación -->
+    <div
+      v-if="postulaOpen"
+      class="modal-backdrop"
+      role="presentation"
+      @click.self="closePostula"
     >
       <form class="postula-modal" aria-label="Formulario de postulación" @submit.prevent="onSubmit">
-        <button class="modal-close" type="button" aria-label="Cerrar" @click="closeModal">×</button>
+        <button class="modal-close" type="button" aria-label="Cerrar" @click="closePostula">×</button>
 
         <p class="eyebrow">Postulación</p>
         <h2>Únete a Basalto</h2>
@@ -68,11 +133,15 @@
           <label for="postula-rut">RUT <span>*</span></label>
           <input
             id="postula-rut"
-            v-model.trim="form.rut"
+            :value="form.rut"
             type="text"
+            inputmode="text"
+            autocomplete="off"
             placeholder="12.345.678-9"
+            maxlength="12"
             required
             :disabled="loading"
+            @input="onRutInput"
           />
         </div>
 
@@ -89,18 +158,31 @@
 
         <div class="field">
           <label for="postula-telefono">Teléfono <span>*</span></label>
-          <input
-            id="postula-telefono"
-            v-model.trim="form.telefono"
-            type="tel"
-            required
-            :disabled="loading"
-          />
+          <div class="phone-input">
+            <span class="phone-prefix" aria-hidden="true">+56</span>
+            <input
+              id="postula-telefono"
+              :value="form.telefono"
+              type="tel"
+              inputmode="numeric"
+              autocomplete="tel-national"
+              placeholder="9 xxxx xxxx"
+              maxlength="11"
+              required
+              :disabled="loading"
+              @input="onTelefonoInput"
+            />
+          </div>
         </div>
 
         <div class="field">
           <label for="postula-cargo">Cargo <span>*</span></label>
-          <select id="postula-cargo" v-model="form.cargo" required :disabled="loading">
+          <select
+            id="postula-cargo"
+            v-model="form.cargo"
+            required
+            :disabled="loading || cargoLocked"
+          >
             <option disabled value="">Selecciona un cargo</option>
             <option v-for="cargo in allCargos" :key="cargo" :value="cargo">{{ cargo }}</option>
           </select>
@@ -133,16 +215,31 @@
 </template>
 
 <script setup>
-import { computed, onMounted, reactive, ref } from 'vue'
+import { computed, onBeforeUnmount, onMounted, reactive, ref } from 'vue'
 import { fetchVacantes, sendPostulacion } from '../api/publicForms'
 
 const grupos = ref([])
 const loadingVacantes = ref(false)
 const vacantesError = ref('')
 
-const allCargos = computed(() => grupos.value.flatMap((grupo) => grupo.items))
+const allCargos = computed(() =>
+  grupos.value.flatMap((grupo) => grupo.items.map((item) => item.titulo))
+)
 
-const modalOpen = ref(false)
+const detalleOpen = ref(false)
+const detalle = ref(null)
+const detalleTitleId = 'vacante-detalle-title'
+const detalleParrafos = computed(() => {
+  const raw = String(detalle.value?.descripcion || '').trim()
+  if (!raw) return []
+  return raw
+    .split(/\n+/)
+    .map((line) => line.trim())
+    .filter(Boolean)
+})
+
+const postulaOpen = ref(false)
+const cargoLocked = ref(false)
 const loading = ref(false)
 const success = ref(false)
 const error = ref('')
@@ -157,26 +254,99 @@ const form = reactive({
   cargo: ''
 })
 
+function formatRut(value) {
+  const clean = String(value || '')
+    .replace(/[^0-9kK]/g, '')
+    .toUpperCase()
+    .slice(0, 9)
+
+  if (!clean) return ''
+  if (clean.length === 1) return clean
+
+  const body = clean.slice(0, -1)
+  const dv = clean.slice(-1)
+  const withDots = body.replace(/\B(?=(\d{3})+(?!\d))/g, '.')
+  return `${withDots}-${dv}`
+}
+
+function formatTelefono(value) {
+  const digits = String(value || '').replace(/\D/g, '').slice(0, 9)
+  if (!digits) return ''
+  if (digits.length <= 1) return digits
+  if (digits.length <= 5) return `${digits.slice(0, 1)} ${digits.slice(1)}`
+  return `${digits.slice(0, 1)} ${digits.slice(1, 5)} ${digits.slice(5)}`
+}
+
+function onRutInput(event) {
+  form.rut = formatRut(event.target.value)
+  if (error.value) error.value = ''
+}
+
+function onTelefonoInput(event) {
+  form.telefono = formatTelefono(event.target.value)
+}
+
+/** Valida RUT chileno con dígito verificador (módulo 11). */
+function isValidRut(rut) {
+  const clean = String(rut || '')
+    .replace(/[^0-9kK]/g, '')
+    .toUpperCase()
+
+  if (clean.length < 2) return false
+
+  const body = clean.slice(0, -1)
+  const dv = clean.slice(-1)
+
+  if (!/^\d+$/.test(body) || body.length > 8) return false
+  if (!/^[0-9K]$/.test(dv)) return false
+
+  let sum = 0
+  let multiplier = 2
+
+  for (let i = body.length - 1; i >= 0; i -= 1) {
+    sum += Number(body[i]) * multiplier
+    multiplier = multiplier === 7 ? 2 : multiplier + 1
+  }
+
+  const remainder = 11 - (sum % 11)
+  const expected = remainder === 11 ? '0' : remainder === 10 ? 'K' : String(remainder)
+
+  return dv === expected
+}
+
+function normalizeVacante(vacante, index) {
+  const titulo = String(vacante.titulo || vacante.nombre || '').trim()
+  if (!titulo) return null
+
+  return {
+    id: vacante.id || `${titulo}-${index}`,
+    titulo,
+    categoria: String(vacante.categoria || 'Otras vacantes').trim() || 'Otras vacantes',
+    descripcion: String(vacante.descripcion || ''),
+    cantidad_vacantes: Number(vacante.cantidad_vacantes) || 0,
+    mostrar_cantidad: Boolean(vacante.mostrar_cantidad)
+  }
+}
+
 function buildGrupos(vacantes) {
   const map = new Map()
 
-  for (const vacante of vacantes) {
-    const titulo = String(vacante.titulo || vacante.nombre || '').trim()
-    if (!titulo) continue
+  vacantes.forEach((raw, index) => {
+    const vacante = normalizeVacante(raw, index)
+    if (!vacante) return
 
-    const categoria = String(vacante.categoria || 'Otras vacantes').trim() || 'Otras vacantes'
-    if (!map.has(categoria)) {
-      map.set(categoria, {
-        title: categoria,
+    if (!map.has(vacante.categoria)) {
+      map.set(vacante.categoria, {
+        title: vacante.categoria,
         vacancies: 0,
         items: []
       })
     }
 
-    const grupo = map.get(categoria)
-    grupo.items.push(titulo)
-    grupo.vacancies += Number(vacante.cantidad_vacantes) || 0
-  }
+    const grupo = map.get(vacante.categoria)
+    grupo.items.push(vacante)
+    grupo.vacancies += vacante.cantidad_vacantes
+  })
 
   return Array.from(map.values())
 }
@@ -203,7 +373,23 @@ function clearCloseTimer() {
   }
 }
 
-function openModal(grupo) {
+function openDetalle(vacante) {
+  detalle.value = vacante
+  detalleOpen.value = true
+}
+
+function closeDetalle() {
+  detalleOpen.value = false
+  detalle.value = null
+}
+
+function postularDesdeDetalle() {
+  const vacante = detalle.value
+  closeDetalle()
+  if (vacante) openPostula(vacante)
+}
+
+function openPostula(vacante) {
   clearCloseTimer()
   success.value = false
   error.value = ''
@@ -212,14 +398,16 @@ function openModal(grupo) {
   form.rut = ''
   form.email = ''
   form.telefono = ''
-  form.cargo = grupo.items[0] || ''
-  modalOpen.value = true
+  form.cargo = vacante?.titulo || ''
+  cargoLocked.value = Boolean(vacante?.titulo)
+  postulaOpen.value = true
 }
 
-function closeModal() {
+function closePostula() {
   if (loading.value) return
   clearCloseTimer()
-  modalOpen.value = false
+  postulaOpen.value = false
+  cargoLocked.value = false
 }
 
 function onFileChange(event) {
@@ -242,6 +430,11 @@ function onFileChange(event) {
 }
 
 async function onSubmit() {
+  if (!isValidRut(form.rut)) {
+    error.value = 'El RUT ingresado no es válido. Revisa el número y el dígito verificador.'
+    return
+  }
+
   if (!cvFile.value) {
     error.value = 'Debes adjuntar tu CV en PDF.'
     return
@@ -254,10 +447,11 @@ async function onSubmit() {
 
   try {
     const data = new FormData()
+    const telefonoDigits = form.telefono.replace(/\D/g, '')
     data.append('nombre', form.nombre)
     data.append('rut', form.rut)
     data.append('email', form.email)
-    data.append('telefono', form.telefono)
+    data.append('telefono', telefonoDigits ? `+56${telefonoDigits}` : '')
     data.append('cargo', form.cargo)
     data.append('cv', cvFile.value)
 
@@ -265,7 +459,7 @@ async function onSubmit() {
     success.value = true
 
     closeTimer = window.setTimeout(() => {
-      modalOpen.value = false
+      postulaOpen.value = false
       closeTimer = null
     }, 15000)
   } catch (e) {
@@ -275,5 +469,22 @@ async function onSubmit() {
   }
 }
 
-onMounted(loadVacantes)
+function onKeydown(event) {
+  if (event.key !== 'Escape') return
+  if (detalleOpen.value) {
+    closeDetalle()
+    return
+  }
+  if (postulaOpen.value && !loading.value) closePostula()
+}
+
+onMounted(() => {
+  loadVacantes()
+  window.addEventListener('keydown', onKeydown)
+})
+
+onBeforeUnmount(() => {
+  window.removeEventListener('keydown', onKeydown)
+  clearCloseTimer()
+})
 </script>
