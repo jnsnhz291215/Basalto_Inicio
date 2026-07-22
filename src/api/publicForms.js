@@ -34,3 +34,18 @@ export async function sendPostulacion(formData) {
   }
   return data
 }
+
+export async function fetchVacantes() {
+  const res = await fetch(`${PUBLIC_API_BASE}/api/public/vacantes`, {
+    method: 'GET',
+    headers: { Accept: 'application/json' }
+  })
+  const data = await parseJson(res)
+  if (!res.ok) {
+    throw new Error(data?.message || 'No se pudieron cargar las vacantes.')
+  }
+  if (Array.isArray(data)) return data
+  if (Array.isArray(data?.data)) return data.data
+  if (Array.isArray(data?.vacantes)) return data.vacantes
+  return []
+}

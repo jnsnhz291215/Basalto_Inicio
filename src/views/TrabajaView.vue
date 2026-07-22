@@ -10,18 +10,24 @@
         </p>
       </header>
 
-      <div class="vacancy-grid">
-        <article v-for="role in roles" :key="role.title" class="vacancy-card">
+      <p v-if="vacantesError" class="form-alert error" role="alert">{{ vacantesError }}</p>
+      <p v-else-if="loadingVacantes" class="trabaja-lead">Cargando vacantes…</p>
+      <p v-else-if="!grupos.length" class="trabaja-lead">No hay vacantes publicadas por ahora.</p>
+
+      <div v-else class="vacancy-grid">
+        <article v-for="grupo in grupos" :key="grupo.title" class="vacancy-card">
           <div class="vacancy-top">
-            <h2>{{ role.title }}</h2>
-            <span class="vacancy-badge">{{ role.vacancies }} vacantes</span>
+            <h2>{{ grupo.title }}</h2>
+            <span v-if="grupo.vacancies > 0" class="vacancy-badge">
+              {{ grupo.vacancies }} vacantes
+            </span>
           </div>
 
           <ul>
-            <li v-for="item in role.items" :key="item">{{ item }}</li>
+            <li v-for="item in grupo.items" :key="item">{{ item }}</li>
           </ul>
 
-          <button class="btn btn-solid" type="button" @click="openModal(role)">
+          <button class="btn btn-solid" type="button" @click="openModal(grupo)">
             Postular
             <span aria-hidden="true">→</span>
           </button>
@@ -127,31 +133,14 @@
 </template>
 
 <script setup>
-import { computed, reactive, ref } from 'vue'
-import { sendPostulacion } from '../api/publicForms'
+import { computed, onMounted, reactive, ref } from 'vue'
+import { fetchVacantes, sendPostulacion } from '../api/publicForms'
 
-const roles = [
-  {
-    title: 'Operadores y Mecánicos',
-    vacancies: 8,
-    items: [
-      'Perforista Diamantina / RC / Dual Rotary',
-      'Mecánico Hidráulico',
-      'Ayudante de Sondaje'
-    ]
-  },
-  {
-    title: 'Profesionales de Staff',
-    vacancies: 6,
-    items: [
-      'Ingeniero(a) de Planificación',
-      'Prevencionista de Riesgos',
-      'Administrativo / Bodeguero'
-    ]
-  }
-]
+const grupos = ref([])
+const loadingVacantes = ref(false)
+const vacantesError = ref('')
 
-const allCargos = computed(() => roles.flatMap((role) => role.items))
+const allCargos = computed(() => grupos.value.flatMap((grupo) => grupo.items))
 
 const modalOpen = ref(false)
 const loading = ref(false)
@@ -168,6 +157,45 @@ const form = reactive({
   cargo: ''
 })
 
+function buildGrupos(vacantes) {
+  const map = new Map()
+
+  for (const vacante of vacantes) {
+    const titulo = String(vacante.titulo || vacante.nombre || '').trim()
+    if (!titulo) continue
+
+    const categoria = String(vacante.categoria || 'Otras vacantes').trim() || 'Otras vacantes'
+    if (!map.has(categoria)) {
+      map.set(categoria, {
+        title: categoria,
+        vacancies: 0,
+        items: []
+      })
+    }
+
+    const grupo = map.get(categoria)
+    grupo.items.push(titulo)
+    grupo.vacancies += Number(vacante.cantidad_vacantes) || 0
+  }
+
+  return Array.from(map.values())
+}
+
+async function loadVacantes() {
+  loadingVacantes.value = true
+  vacantesError.value = ''
+  try {
+    const vacantes = await fetchVacantes()
+    grupos.value = buildGrupos(vacantes)
+  } catch (e) {
+    console.error('Error cargando vacantes:', e)
+    vacantesError.value = e.message || 'No se pudieron cargar las vacantes.'
+    grupos.value = []
+  } finally {
+    loadingVacantes.value = false
+  }
+}
+
 function clearCloseTimer() {
   if (closeTimer) {
     window.clearTimeout(closeTimer)
@@ -175,7 +203,7 @@ function clearCloseTimer() {
   }
 }
 
-function openModal(role) {
+function openModal(grupo) {
   clearCloseTimer()
   success.value = false
   error.value = ''
@@ -184,7 +212,7 @@ function openModal(role) {
   form.rut = ''
   form.email = ''
   form.telefono = ''
-  form.cargo = role.items[0] || ''
+  form.cargo = grupo.items[0] || ''
   modalOpen.value = true
 }
 
@@ -246,4 +274,6 @@ async function onSubmit() {
     loading.value = false
   }
 }
+
+onMounted(loadVacantes)
 </script>
