@@ -200,6 +200,19 @@
           />
         </div>
 
+        <!-- Campo Honeypot (trampa para bots) -->
+        <div class="hp-field" aria-hidden="true">
+          <label for="website_hp">No llenar este campo</label>
+          <input
+            id="website_hp"
+            v-model="form.website_hp"
+            type="text"
+            name="website_hp"
+            tabindex="-1"
+            autocomplete="off"
+          />
+        </div>
+
         <p v-if="success" class="form-alert success" role="status">
           ¡Postulación enviada con éxito! Revisaremos tu perfil a la brevedad.
         </p>
@@ -251,7 +264,8 @@ const form = reactive({
   rut: '',
   email: '',
   telefono: '',
-  cargo: ''
+  cargo: '',
+  website_hp: ''
 })
 
 function formatRut(value) {
@@ -399,6 +413,7 @@ function openPostula(vacante) {
   form.email = ''
   form.telefono = ''
   form.cargo = vacante?.titulo || ''
+  form.website_hp = ''
   cargoLocked.value = Boolean(vacante?.titulo)
   postulaOpen.value = true
 }
@@ -430,6 +445,17 @@ function onFileChange(event) {
 }
 
 async function onSubmit() {
+  // Honeypot: si un bot llenó el campo oculto, fingir éxito y no enviar.
+  if (form.website_hp.trim()) {
+    success.value = true
+    error.value = ''
+    closeTimer = window.setTimeout(() => {
+      postulaOpen.value = false
+      closeTimer = null
+    }, 15000)
+    return
+  }
+
   if (!isValidRut(form.rut)) {
     error.value = 'El RUT ingresado no es válido. Revisa el número y el dígito verificador.'
     return
@@ -453,6 +479,7 @@ async function onSubmit() {
     data.append('email', form.email)
     data.append('telefono', telefonoDigits ? `+56${telefonoDigits}` : '')
     data.append('cargo', form.cargo)
+    data.append('website_hp', form.website_hp)
     data.append('cv', cvFile.value)
 
     await sendPostulacion(data)
