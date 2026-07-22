@@ -44,6 +44,23 @@
             />
           </div>
 
+          <button
+            class="hero-carousel-nav prev"
+            type="button"
+            aria-label="Foto anterior"
+            @click="prev"
+          >
+            ‹
+          </button>
+          <button
+            class="hero-carousel-nav next"
+            type="button"
+            aria-label="Foto siguiente"
+            @click="goNext"
+          >
+            ›
+          </button>
+
           <div class="hero-carousel-dots" role="tablist" aria-label="Seleccionar foto">
             <button
               v-for="(slide, index) in slides"
@@ -116,6 +133,16 @@ function goTo(index) {
 
 function next() {
   activeIndex.value = (activeIndex.value + 1) % slides.length
+}
+
+function prev() {
+  activeIndex.value = (activeIndex.value - 1 + slides.length) % slides.length
+  restart()
+}
+
+function goNext() {
+  next()
+  restart()
 }
 
 function pause() {
