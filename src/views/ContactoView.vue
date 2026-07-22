@@ -34,17 +34,6 @@
               <a href="mailto:info@basaltodrilling.cl">info@basaltodrilling.cl</a>
             </div>
           </li>
-          <li>
-            <span class="contacto-icon" aria-hidden="true">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M22 16.9v2a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h2a2 2 0 0 1 2 1.7c.1.9.3 1.8.6 2.6a2 2 0 0 1-.5 2.1L7.1 9.9a16 16 0 0 0 6 6l1.5-1.1a2 2 0 0 1 2.1-.4c.8.3 1.7.5 2.6.6A2 2 0 0 1 22 16.9z" />
-              </svg>
-            </span>
-            <div>
-              <strong>Teléfono</strong>
-              <p>Aún no disponible</p>
-            </div>
-          </li>
         </ul>
       </div>
 
