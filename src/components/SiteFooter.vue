@@ -5,7 +5,7 @@
         <RouterLink class="footer-lockup" to="/" aria-label="Basalto Drilling">
           <span class="footer-mark" aria-hidden="true">
             <svg viewBox="0 0 48 48" fill="none">
-              <g fill="#f47b20">
+              <g fill="#ea580c">
                 <rect x="19" y="2" width="10" height="12" rx="2" transform="rotate(0 24 24)" />
                 <rect x="19" y="2" width="10" height="12" rx="2" transform="rotate(45 24 24)" />
                 <rect x="19" y="2" width="10" height="12" rx="2" transform="rotate(90 24 24)" />

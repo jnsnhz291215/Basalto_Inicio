@@ -12,7 +12,7 @@
         </header>
 
         <div class="service-cards">
-          <article v-for="service in services" :key="service.title" class="service-card">
+          <article v-for="service in services" :key="service.title" class="service-card tarjeta-servicio">
             <span class="service-icon" aria-hidden="true" v-html="service.icon" />
             <h2>{{ service.title }}</h2>
             <p>{{ service.text }}</p>
