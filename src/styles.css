@@ -1354,6 +1354,8 @@ img {
   padding: 1rem;
   background: rgba(0, 0, 0, 0.72);
   backdrop-filter: blur(10px);
+  overscroll-behavior: contain;
+  overflow: hidden;
 }
 
 .postula-modal {

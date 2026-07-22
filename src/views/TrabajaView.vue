@@ -228,7 +228,7 @@
 </template>
 
 <script setup>
-import { computed, onBeforeUnmount, onMounted, reactive, ref } from 'vue'
+import { computed, onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue'
 import { fetchVacantes, sendPostulacion } from '../api/publicForms'
 
 const grupos = ref([])
@@ -258,6 +258,23 @@ const success = ref(false)
 const error = ref('')
 const cvFile = ref(null)
 let closeTimer = null
+let previousBodyOverflow = ''
+
+function lockBodyScroll() {
+  previousBodyOverflow = document.body.style.overflow
+  document.body.style.overflow = 'hidden'
+  document.documentElement.style.overflow = 'hidden'
+}
+
+function unlockBodyScroll() {
+  document.body.style.overflow = previousBodyOverflow || ''
+  document.documentElement.style.overflow = ''
+}
+
+watch([detalleOpen, postulaOpen], ([detalle, postula]) => {
+  if (detalle || postula) lockBodyScroll()
+  else unlockBodyScroll()
+})
 
 const form = reactive({
   nombre: '',
@@ -513,5 +530,6 @@ onMounted(() => {
 onBeforeUnmount(() => {
   window.removeEventListener('keydown', onKeydown)
   clearCloseTimer()
+  unlockBodyScroll()
 })
 </script>
