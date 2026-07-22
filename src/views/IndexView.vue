@@ -24,13 +24,40 @@
       </div>
 
       <figure class="hero-media">
-        <img
-          src="/images/hero-faena.png"
-          alt="Equipo de perforación en faena minera al atardecer"
-          width="1200"
-          height="675"
-        />
-        <figcaption>Faena — Desierto de Atacama</figcaption>
+        <div
+          class="hero-carousel"
+          aria-roledescription="carrusel"
+          aria-label="Faenas Basalto Drilling"
+          @mouseenter="pause"
+          @mouseleave="resume"
+        >
+          <div class="hero-carousel-track">
+            <img
+              v-for="(slide, index) in slides"
+              :key="slide.src"
+              :src="slide.src"
+              :alt="slide.alt"
+              class="hero-carousel-slide"
+              :class="{ active: index === activeIndex }"
+              width="768"
+              height="1024"
+            />
+          </div>
+
+          <div class="hero-carousel-dots" role="tablist" aria-label="Seleccionar foto">
+            <button
+              v-for="(slide, index) in slides"
+              :key="slide.src"
+              type="button"
+              role="tab"
+              :aria-selected="index === activeIndex"
+              :aria-label="`Foto ${index + 1}`"
+              :class="{ active: index === activeIndex }"
+              @click="goTo(index)"
+            />
+          </div>
+        </div>
+        <figcaption>{{ slides[activeIndex].caption }}</figcaption>
       </figure>
     </div>
 
@@ -46,7 +73,31 @@
 </template>
 
 <script setup>
+import { onBeforeUnmount, onMounted, ref } from 'vue'
 import { RouterLink } from 'vue-router'
+
+const slides = [
+  {
+    src: '/images/hero/hero-01.jpg',
+    alt: 'Equipo de perforación Basalto Drilling',
+    caption: 'Equipo Basalto — Perforación'
+  },
+  {
+    src: '/images/hero/hero-02.jpg',
+    alt: 'Perforadora en faena desértica',
+    caption: 'Faena — Desierto de Atacama'
+  },
+  {
+    src: '/images/hero/hero-03.jpg',
+    alt: 'Operación de sondaje al atardecer',
+    caption: 'Faena — Desierto de Atacama'
+  },
+  {
+    src: '/images/hero/hero-04.jpg',
+    alt: 'Equipo en terreno durante operación de sondaje',
+    caption: 'Operación en terreno'
+  }
+]
 
 const heroStats = [
   { value: '10+', label: 'Años de experiencia' },
@@ -54,4 +105,35 @@ const heroStats = [
   { value: '2015', label: 'Año de fundación' },
   { value: '24/7', label: 'Operación en faena' }
 ]
+
+const activeIndex = ref(0)
+let timerId = null
+
+function goTo(index) {
+  activeIndex.value = index
+  restart()
+}
+
+function next() {
+  activeIndex.value = (activeIndex.value + 1) % slides.length
+}
+
+function pause() {
+  if (timerId) {
+    window.clearInterval(timerId)
+    timerId = null
+  }
+}
+
+function resume() {
+  pause()
+  timerId = window.setInterval(next, 4500)
+}
+
+function restart() {
+  resume()
+}
+
+onMounted(resume)
+onBeforeUnmount(pause)
 </script>
