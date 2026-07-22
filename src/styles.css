@@ -1085,13 +1085,11 @@ img {
   padding: 0.45rem;
   background: var(--surface);
   border: 1px solid var(--border);
-  width: min(100%, 420px);
-  justify-self: end;
 }
 
 .nosotros-media img {
   width: 100%;
-  aspect-ratio: 3 / 4;
+  aspect-ratio: 4 / 3;
   object-fit: cover;
 }
 
@@ -1246,11 +1244,6 @@ img {
   }
 
   .hero-media {
-    width: min(100%, 360px);
-    justify-self: center;
-  }
-
-  .nosotros-media {
     width: min(100%, 360px);
     justify-self: center;
   }

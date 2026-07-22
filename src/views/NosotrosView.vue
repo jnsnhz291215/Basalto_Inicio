@@ -24,8 +24,8 @@
         <img
           src="/images/nosotros-equipo.jpg"
           alt="Operador Basalto Drilling en faena nocturna"
-          width="768"
-          height="1024"
+          width="900"
+          height="675"
         />
       </figure>
     </div>
