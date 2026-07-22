@@ -42,7 +42,7 @@
             </span>
             <div>
               <strong>Teléfono</strong>
-              <a href="tel:+56232166092">+56 2 3216 6092</a>
+              <p>Aún no disponible</p>
             </div>
           </li>
         </ul>
@@ -118,6 +118,19 @@
         </p>
         <p v-if="error" class="form-alert error" role="alert">{{ error }}</p>
 
+        <!-- Campo Honeypot (Trampa de spam) -->
+        <div class="hp-field" aria-hidden="true">
+          <label for="website_hp_contact">No llenar este campo</label>
+          <input
+            id="website_hp_contact"
+            v-model="form.website_hp"
+            type="text"
+            name="website_hp"
+            tabindex="-1"
+            autocomplete="off"
+          />
+        </div>
+
         <button class="btn btn-solid full" type="submit" :disabled="loading">
           <span v-if="loading" class="btn-spinner" aria-hidden="true" />
           {{ loading ? 'Enviando…' : 'Enviar solicitud' }}
@@ -146,7 +159,8 @@ const form = reactive({
   empresa: '',
   email: '',
   telefono: '',
-  mensaje: ''
+  mensaje: '',
+  website_hp: ''
 })
 
 const loading = ref(false)
@@ -154,18 +168,33 @@ const success = ref(false)
 const error = ref('')
 
 async function onSubmit() {
+  // Honeypot: bots que llenan el campo oculto reciben éxito falso.
+  if (form.website_hp.trim()) {
+    success.value = true
+    error.value = ''
+    return
+  }
+
   loading.value = true
   success.value = false
   error.value = ''
 
   try {
-    await sendContacto({ ...form })
+    await sendContacto({
+      nombre: form.nombre,
+      empresa: form.empresa,
+      email: form.email,
+      telefono: form.telefono,
+      mensaje: form.mensaje,
+      website_hp: form.website_hp
+    })
     success.value = true
     form.nombre = ''
     form.empresa = ''
     form.email = ''
     form.telefono = ''
     form.mensaje = ''
+    form.website_hp = ''
   } catch (e) {
     error.value = e.message || 'No se pudo enviar la solicitud.'
   } finally {
