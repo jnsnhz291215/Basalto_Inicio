@@ -1,5 +1,5 @@
 :root {
-  --bg-principal: #f9f6f0;
+  --bg-principal: #f9dbc7;
   --bg-tarjeta: #ffffff;
   --texto-base: #1a1a1a;
   --texto-mutado: #665e52;
@@ -20,11 +20,11 @@
   --container: 1180px;
   --font: 'Barlow', system-ui, sans-serif;
   --display: 'Barlow Condensed', 'Barlow', system-ui, sans-serif;
-  --grid-bg:
-    linear-gradient(to right, rgba(26, 26, 26, 0.035) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(26, 26, 26, 0.035) 1px, transparent 1px);
+  --grid-bg: radial-gradient(rgba(234, 88, 12, 0.15) 1px, transparent 0);
   --shadow-card: 0 4px 20px -2px rgba(0, 0, 0, 0.05);
-  --glow-soft: radial-gradient(circle at top right, rgba(234, 88, 12, 0.08) 0%, transparent 60%);
+  --glow-soft: radial-gradient(circle at top right, rgba(234, 88, 12, 0.1) 0%, transparent 60%);
+  --page-pad-top: clamp(2.5rem, 5vw, 4rem);
+  --page-pad-bottom: clamp(3rem, 6vw, 5rem);
 }
 
 * {
@@ -43,7 +43,7 @@ body {
   color: var(--ink);
   background-color: var(--bg);
   background-image: var(--grid-bg);
-  background-size: 40px 40px;
+  background-size: 24px 24px;
   background-attachment: fixed;
   -webkit-font-smoothing: antialiased;
 }
@@ -92,7 +92,7 @@ img {
   left: 0;
   right: 0;
   z-index: 30;
-  background: rgba(249, 246, 240, 0.92);
+  background: rgba(249, 219, 199, 0.92);
   backdrop-filter: blur(14px);
   border-bottom: 1px solid var(--border);
 }
@@ -273,7 +273,7 @@ img {
 .hero {
   position: relative;
   isolation: isolate;
-  padding: clamp(2.5rem, 5vw, 4rem) 0 clamp(2rem, 4vw, 3rem);
+  padding: var(--page-pad-top) 0 var(--page-pad-bottom);
   background: var(--glow-soft);
   overflow: hidden;
 }
@@ -287,7 +287,7 @@ img {
   display: grid;
   grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.7fr);
   gap: clamp(1.5rem, 4vw, 3.5rem);
-  align-items: center;
+  align-items: start;
 }
 
 .eyebrow {
@@ -486,7 +486,7 @@ img {
 }
 
 .servicios-block {
-  padding: clamp(3rem, 6vw, 4.75rem) 0;
+  padding: var(--page-pad-top) 0 var(--page-pad-bottom);
 }
 
 .servicios-block + .servicios-block {
@@ -680,7 +680,7 @@ img {
 /* Contacto */
 .contacto-page {
   min-height: calc(100vh - 76px);
-  padding: clamp(3rem, 6vw, 4.75rem) 0;
+  padding: var(--page-pad-top) 0 var(--page-pad-bottom);
   background: var(--glow-soft);
 }
 
@@ -819,7 +819,7 @@ img {
 .trabaja-page {
   position: relative;
   min-height: calc(100vh - 76px);
-  padding: clamp(3rem, 6vw, 4.75rem) 0;
+  padding: var(--page-pad-top) 0 var(--page-pad-bottom);
   background: var(--glow-soft);
 }
 
@@ -1050,7 +1050,7 @@ img {
 
 /* Inner pages */
 .page-section {
-  padding: clamp(2.5rem, 5vw, 4rem) 0 clamp(3rem, 6vw, 5rem);
+  padding: var(--page-pad-top) 0 var(--page-pad-bottom);
   background: var(--glow-soft);
   min-height: calc(100vh - 76px);
 }
@@ -1160,14 +1160,14 @@ img {
   background: var(--glow-soft);
   color: var(--ink);
   min-height: calc(100vh - 76px);
-  padding: clamp(3rem, 7vw, 5.5rem) 0;
+  padding: var(--page-pad-top) 0 var(--page-pad-bottom);
 }
 
 .nosotros-grid {
   display: grid;
   grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
   gap: clamp(2rem, 5vw, 4rem);
-  align-items: center;
+  align-items: start;
 }
 
 .nosotros-copy .eyebrow {
@@ -1495,7 +1495,7 @@ img {
     align-items: stretch;
     gap: 0;
     padding: 0.5rem 1.25rem 1rem;
-    background: rgba(249, 246, 240, 0.98);
+    background: rgba(249, 219, 199, 0.98);
     border-bottom: 1px solid var(--border);
   }
 
